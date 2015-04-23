@@ -10,11 +10,14 @@ function setUp(){
   $("#make_new_string_param").click(makeNewStringParam);
 
   chrome.storage.local.get("all_scripts", function(obj){
-    var asr = JSON.parse(obj.all_scripts);
-    if (!asr){
-      asr = [];
+    if (obj && 'all_scripts' in obj) {
+      console.log(obj);
+      var asr = JSON.parse(obj.all_scripts);
+      if (!asr){
+        asr = [];
+      }
+      all_scripts = asr;
     }
-    all_scripts = asr;
     showScripts(all_scripts);
   });
 }
