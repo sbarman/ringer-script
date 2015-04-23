@@ -4,7 +4,7 @@ function setUp(){
   utilities.listenForMessage("content", "mainpanel", "requestURLs",function(){utilities.sendMessage("mainpanel","content","URLs", _.pluck(all_scripts,"url"));});
   utilities.listenForMessage("content", "mainpanel", "runScript", runScript);
 
-  $("button").button();	
+  $("button").button(); 
   $("#start_recording").click(startRecording);
   $("#done_recording").click(doneRecording);
   $("#make_new_string_param").click(makeNewStringParam);

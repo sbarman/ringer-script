@@ -26,7 +26,7 @@ var saveTargetInfo;
    * info object, and convert it to a list of possible DOM nodes */ 
 
   function getTargetSimple(targetInfo) {
-	console.log("getTargetSimple", targetInfo, targetInfo.xpath);
+  console.log("getTargetSimple", targetInfo, targetInfo.xpath);
     return xPathToNodes(targetInfo.xpath);
   }
 
@@ -174,7 +174,7 @@ var saveTargetInfo;
   /* Given the target info, produce a single target DOM node. May get several
    * possible candidates, and would just return the first candidate. */
   getTarget = function(targetInfo) {
-	console.log("targetInfo", targetInfo);
+  console.log("targetInfo", targetInfo);
     var targets = getTargetFunction(targetInfo);
     if (!targets) {
       console.log("No target found.");
