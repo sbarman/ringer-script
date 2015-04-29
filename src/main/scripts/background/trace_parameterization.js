@@ -145,7 +145,7 @@ function ParameterizedTrace(trace){
   
   this.getStandardTrace = function(){
     console.log("about to clone trace ", trace);
-    var cloned_trace = clone(trace);
+    var cloned_trace = $.extend(true, [], trace);
     console.log("successfully cloned trace");
     var prop_corrections = {};
     for (var i = 0; i< cloned_trace.length; i++){

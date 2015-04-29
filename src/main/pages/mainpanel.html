@@ -1,43 +1,53 @@
+<!DOCTYPE html>
 <html>
+  <head>
+    <title>Ringer Script</title> 
+  </head>
+  <body>
+    <link rel="stylesheet" type="text/css" href="../style/style.css" />
+    <link rel="stylesheet" type="text/css" href="../style/jquery-ui-1.11.0.custom/jquery-ui.min.css" />
+    <link rel="stylesheet" type="text/css" href="../style/jquery-ui-1.11.0.custom/jquery-ui.structure.min.css" />
+    <link rel="stylesheet" type="text/css" href="../style/jquery-ui-1.11.0.custom/jquery-ui.theme.min.css" />
+   
+    <div id="record_buttons"> 
+      <button id="start_recording">Start Recording</button>
+      <button id="done_recording">Done Recording</button>
+    </div>
+    <div id="recordings"></div>
+    <div id="script">
+      <textarea id="script_text" cols=80></textarea>
+    </div>
+    <div id="replay_buttons">
+      <button id="start_script">Start Script</button>
+    </div>
 
-<head>
-  <script type="text/javascript" src="../../lib/jquery.js"></script>
-  <script type="text/javascript" src="../../lib/jquery-ui.js"></script>
-  <script type="text/javascript" src="../../lib/underscore-min.js"></script>
-  <script type="text/javascript" src="../../lib/json2.js"></script>
-  <script type="text/javascript" src="../../lib/URI.js"></script>
-  <script type="text/javascript" src="../../lib/rr/main/scripts/common/common.js"></script>
-  <script type="text/javascript" src="../../lib/rr/main/scripts/common/params.js"></script>
-  <script type="text/javascript" src="../../lib/rr/main/scripts/common/logging.js"></script>
-  <script type="text/javascript" src="../../lib/rr/main/scripts/background/port.js"></script>
-  <script type="text/javascript" src="../../lib/rr/main/scripts/background/url.js"></script>
-  <script type="text/javascript" src="../../lib/rr/main/scripts/background/trigger.js"></script>
-  <script type="text/javascript" src="../../lib/rr/main/scripts/background/script_server.js"></script>
-  <script type="text/javascript" src="../../lib/rr/main/scripts/background/main_panel.js"></script>
-  <script type="text/javascript" src="../../lib/rr/main/scripts/background/simple_record.js"></script>
-  <script type="text/javascript" src="../scripts/utilities.js"></script>
-  <script type="text/javascript" src="../scripts/background/trace_parameterization.js"></script>
-  <script type="text/javascript" src="../scripts/background/mainpanel_script.js"></script>
-  
-  <link rel="stylesheet" type="text/css" href="../style/style.css" />
-  <link rel="stylesheet" type="text/css" href="../style/jquery-ui-1.11.0.custom/jquery-ui.min.css" />
-  <link rel="stylesheet" type="text/css" href="../style/jquery-ui-1.11.0.custom/jquery-ui.structure.min.css" />
-  <link rel="stylesheet" type="text/css" href="../style/jquery-ui-1.11.0.custom/jquery-ui.theme.min.css" />
-  
-</head>
-<body>
-<button id="start_recording">Start Recording</button>
-<button id="done_recording">Done Recording</button>
-<div id="scripts"></div>
-<div id="editing_controls" style="display:none">
-  <div>New String Parameter</div>
-  <div>
-    Original Typed String: <input type="text" id="originalString">
-    Parameter Name: <input type="text" id="newStringParamName">
-    <button id="make_new_string_param">Make Parameter</button>
-  </div>
-  <div>Edit String Parameter</div>
-  <div id="string_parameters"></div>
-</div>
-</body>
+    <div id="editing_controls" style="display:none">
+      <div>New String Parameter</div>
+      <div>
+        Original Typed String: <input type="text" id="originalString">
+        Parameter Name: <input type="text" id="newStringParamName">
+        <button id="make_new_string_param">Make Parameter</button>
+      </div>
+      <div>Edit String Parameter</div>
+      <div id="string_parameters"></div>
+    </div>
+
+    <script type="text/javascript" src="../../lib/jquery.js"></script>
+    <script type="text/javascript" src="../../lib/jquery-ui.js"></script>
+    <script type="text/javascript" src="../../lib/underscore-min.js"></script>
+    <script type="text/javascript" src="../../lib/json2.js"></script>
+    <script type="text/javascript" src="../../lib/URI.js"></script>
+    <script type="text/javascript" src="../../lib/rr/main/scripts/common/common.js"></script>
+    <script type="text/javascript" src="../../lib/rr/main/scripts/common/params.js"></script>
+    <script type="text/javascript" src="../../lib/rr/main/scripts/common/logging.js"></script>
+    <script type="text/javascript" src="../../lib/rr/main/scripts/background/port.js"></script>
+    <script type="text/javascript" src="../../lib/rr/main/scripts/background/url.js"></script>
+    <script type="text/javascript" src="../../lib/rr/main/scripts/background/trigger.js"></script>
+    <script type="text/javascript" src="../../lib/rr/main/scripts/background/script_server.js"></script>
+    <script type="text/javascript" src="../../lib/rr/main/scripts/background/main_panel.js"></script>
+    <script type="text/javascript" src="../../lib/rr/main/scripts/background/simple_record.js"></script>
+    <script type="text/javascript" src="../scripts/utilities.js"></script>
+    <script type="text/javascript" src="../scripts/background/trace_parameterization.js"></script>
+    <script type="text/javascript" src="../scripts/background/mainpanel_script.js"></script>
+  </body>
 </html>

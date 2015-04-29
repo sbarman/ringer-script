@@ -21,9 +21,9 @@ function checkURLs(urls){
   }
 }
 
-$(function(){
-  additional_recording_handlers_on["frame_id"] = true;
-  additional_recording_handlers["frame_id"] = function(node){
-    return SimpleRecord.getFrameId();
-  };
-});
+// $(function(){
+//   additional_recording_handlers_on["frame_id"] = true;
+//   additional_recording_handlers["frame_id"] = function(node){
+//     return SimpleRecord.getFrameId();
+//   };
+// });

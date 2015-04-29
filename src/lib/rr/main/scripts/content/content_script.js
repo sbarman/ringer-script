@@ -838,5 +838,5 @@ function injectScripts(paths) {
 
 // TODO(sbarman): need to wrap these so variables don't escape into the
 // enclosing scope
-injectScripts(['main/scripts/common/params.js', 
-               'main/scripts/content/injected.js']);
+injectScripts(['lib/rr/main/scripts/common/params.js', 
+               'lib/rr/main/scripts/content/injected.js']);

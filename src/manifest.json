@@ -24,6 +24,8 @@
     "https://*/*",
     "<all_urls>"
   ],
+  "content_security_policy": 
+      "script-src 'self' 'unsafe-eval'; object-src 'self'",
   "background": {
     "page": "main/pages/background.html"
   },
@@ -51,9 +53,9 @@
     }
   ],
   "web_accessible_resources": [
-    "main/scripts/utilities.js", 
-    "lib/jquery.js", 
-    "lib/underscore-min.js", 
+//    "main/scripts/utilities.js", 
+//    "lib/jquery.js", 
+//    "lib/underscore-min.js", 
     "lib/rr/main/scripts/content/injected.js",
     "lib/rr/main/scripts/common/params.js",
     "lib/rr/main/scripts/common/logging.js",

@@ -1,131 +1,204 @@
-var all_scripts = [];
-function setUp(){
+// create closure
+// (function() {
+  'use strict'
 
-  utilities.listenForMessage("content", "mainpanel", "requestURLs",function(){utilities.sendMessage("mainpanel","content","URLs", _.pluck(all_scripts,"url"));});
-  utilities.listenForMessage("content", "mainpanel", "runScript", runScript);
+  // list of all traces to use as recordings 
+  var allTraces = [];
+  // list of scripts (processed traces)
+  var allScripts = [];
+  // list of all script ids
+  var allIds = [];
 
-  $("button").button(); 
-  $("#start_recording").click(startRecording);
-  $("#done_recording").click(doneRecording);
-  $("#make_new_string_param").click(makeNewStringParam);
-
-  chrome.storage.local.get("all_scripts", function(obj){
-    if (obj && 'all_scripts' in obj) {
-      console.log(obj);
-      var asr = JSON.parse(obj.all_scripts);
-      if (!asr){
-        asr = [];
+  function loadTraces() {
+    // load scripts from storage
+    chrome.storage.local.get("allTraces", function(obj){
+      if (obj && 'allTraces' in obj) {
+        console.log(obj);
+        allTraces = JSON.parse(obj.allTraces);
       }
-      all_scripts = asr;
+      addTraces(allTraces);
+    });
+  }
+
+  function saveTraces() {
+    chrome.storage.local.set({"allTraces": JSON.stringify(allTraces)});
+  }
+
+  function setUp(){
+    // apply jQuery UI theme on the buttons
+    $("button").button(); 
+    $("#start_recording").click(startRecording);
+    $("#done_recording").click(doneRecording);
+    $("#start_script").click(runScript);
+  
+    $("#script_text").val(
+        "var parameterizedTrace = scripts[0].parameterizedTrace;\n" +
+        "console.log(parameterizedTrace.getConfig());\n" +
+        "parameterizedTrace.useFrame('frame', msg.frame_id);\n" +
+        "var standard_trace = parameterizedTrace.getStandardTrace();\n" +
+        "var config = parameterizedTrace.getConfig();\n" +
+        "console.log(standard_trace,config);\n" +
+        "SimpleRecord.replay(standard_trace, config);\n");
+
+    loadTraces();
+  }
+  
+  // run when the dom has finished loading
+  $(setUp);
+
+  function addTraces(traceList){
+    traceList.forEach(function(t) {
+      addTrace(t);
+    });
+  }
+  
+  function addTrace(trace) {
+    allTraces.push(trace);
+    saveTraces();
+
+    trace = sanitizeTrace(trace);
+    // console.log("trace:", trace);
+    var parameterizedTrace = new ParameterizedTrace(trace);
+    // console.log("paramaterized:", parameterizedTrace);
+  
+    var domEvents = _.filter(trace, function(obj){return obj.type === "dom";});
+    var firstEvent = domEvents[0];
+    var url = firstEvent.frame.URL;
+
+    var id = getNewId(url, allIds);
+
+    var script = {
+      id: id,
+      url: url,
+      parameterizedTrace: parameterizedTrace,
+    };
+
+    allScripts.push(script);
+    allIds.push(id);
+ 
+    var removeButton = $('<button>Remove</button>');
+    removeButton.button();
+    removeButton.click(function() {removeScript(id);});
+
+    var newDiv = $('<div>' + id + ":" + url + '</div>');
+    newDiv.attr('id', id);
+    newDiv.prepend(removeButton);
+    $("#recordings").append(newDiv);
+  }
+
+  function getNewId(url, takenIds) {
+    var blackList = ['www', 'http', 'com'];
+
+    var id = "";
+    var uri = URI(url);
+    var domain = uri.domain()
+    id = domain.split('.')[0];
+
+    if (!id)
+      id = "script";
+
+    if (takenIds.indexOf(id) >= 0) {
+      var index = 1;
+      while (takenIds.indexOf(id + index) >= 0) {
+        index++;
+      }
+      id = id + index;
     }
-    showScripts(all_scripts);
-  });
-}
 
-$(setUp);
-
-function showScripts(scriptsList){
-  var scriptsDiv = $("#scripts");
-  scriptsDiv.html("");
-  for (var i = 0; i<scriptsList.length; i++){
-    (function(){
-      var script = scriptsList[i];
-      var url = script.url;
-      var newDiv = $('<div>'+url+'</div>');
-      newDiv.click(function(){editScript(script);});
-      console.log(scriptsDiv);
-      scriptsDiv.append(newDiv);
-      console.log(scriptsDiv);
-    })(); //fake block scope
+    return id;
   }
-  console.log(scriptsDiv);
-}
 
-var currently_edited_script = null;
-function editScript(script){
-  currently_edited_script = script;
-  document.getElementById("editing_controls").style.display = "inherit";
-  displayScriptParameters(script);
-}
-
-function displayScriptParameters(script){
-  var params = script.params;
-  var paramsDiv =  $("#string_parameters").html("");
-  for (var i = 0; i<params.length; i++){
-    var param = params[i];
-    var newDiv = $('<div>'+param.name+': <input type="text" class="stringParamName" id="'+param.name+'" placeholder="'+param.curr_value+'"><button class="update_params">Update</button></div>');
-    paramsDiv.append(newDiv);
+  function sanitizeTrace(trace){
+    var sanitizedTrace = _.filter(trace, function(obj){
+      return obj.state !== "stopped";
+    });
+    return sanitizedTrace;
   }
-  $(".update_params").click(updateParameters);
-}
 
-function makeNewStringParam(){
-  var name = $("#newStringParamName").val();
-  var original_value = $("#originalString").val();
-  console.log(name, original_value);
-  currently_edited_script.params.push({name:name,curr_value:""});
-  currently_edited_script.parameterized_trace.parameterizeTypedString(name, original_value);
-  displayScriptParameters(currently_edited_script); //show the new param which now needs to be set
-}
-
-function updateParameters(){
-  var paramsDivs =  $(".stringParamName").html("");
-  console.log(paramsDivs);
-  var params = [];
-  for (var i = 0; i<paramsDivs.length; i++){
-    var paramDiv = $(paramsDivs[i]);
-    console.log(paramDiv);
-    var name = paramDiv.attr('id');
-    console.log(name);
-    var new_value = paramDiv.val();
-    params.push({name:name,curr_value:new_value});
-    currently_edited_script.parameterized_trace.useTypedString(name, new_value);
+  function removeScript(id) {
+    // TODO 
   }
-  currently_edited_script.params = params;
-}
 
-function runScript(msg){
-  var url = msg.url;
-  for (var i = 0; i<all_scripts.length; i++){
-    if (all_scripts[i].url === url){
-      console.log(url);
-      var parameterized_trace = all_scripts[i].parameterized_trace;
-      console.log(parameterized_trace.getConfig());
-      parameterized_trace.useFrame("frame", msg.frame_id);
-      var standard_trace = parameterized_trace.getStandardTrace();
-      var config = parameterized_trace.getConfig();
-      console.log(standard_trace,config);
-      SimpleRecord.replay(standard_trace, config);
-      console.log("replayed");
-      return;
-    }
+  function runScript(){
+    var text = $('#script_text').val();
+    console.log(text);
+    setTimeout(function() {
+      var ids = loadScripts();
+      eval(text);
+      removeScripts(ids);
+    },0);
   }
-}
 
-function startRecording(){
-  SimpleRecord.startRecording();
-}
+  function loadScripts() {
+    var ids = [];
+    allScripts.forEach(function(script) {
+      window[script.id] = script.parameterizedTrace;
+      ids.push(script.id);
+    });
+    return ids;
+  }
 
-function doneRecording(){
-  var trace = SimpleRecord.stopRecording();
-  trace = sanitizeTrace(trace);
-  console.log(trace);
-  var parameterized_trace = new ParameterizedTrace(trace);
-  var filtered_trace = _.filter(trace, function(obj){return obj.type === "dom";});
-  parameterized_trace.parameterizeFrame("frame", filtered_trace[0].additional.frame_id);
-  var script = {};
-  script.params = [];
-  script.url = filtered_trace[0].frame.URL;
-  console.log("think url is: "+script.url);
-  script.parameterized_trace = parameterized_trace;
-  console.log(parameterized_trace);
-  all_scripts.push(script);
-  var data = {"all_scripts":JSON.stringify(all_scripts)};
-  chrome.storage.local.set(data);
-  showScripts(all_scripts); //update the display now that we have a new one
-}
+  function removeScripts(ids) {
+    ids.forEach(function(id) {
+      if (id in window) {
+        delete window[id];
+      }
+    });
+  }
+  
+  function startRecording(){
+    SimpleRecord.startRecording();
+  }
+  
+  function doneRecording(){
+    var trace = SimpleRecord.stopRecording();
+    addTrace(trace);
+  }
+// })();
 
-function sanitizeTrace(trace){
-  return _.filter(trace, function(obj){return obj.state !== "stopped";});
-}
 
+  
+  
+  // var currently_edited_script = null;
+  // function editScript(script){
+  //   currently_edited_script = script;
+  //   document.getElementById("editing_controls").style.display = "inherit";
+  //   displayScriptParameters(script);
+  // }
+  // 
+  // function displayScriptParameters(script){
+  //   var params = script.params;
+  //   var paramsDiv =  $("#string_parameters").html("");
+  //   for (var i = 0; i<params.length; i++){
+  //     var param = params[i];
+  //     var newDiv = $('<div>'+param.name+': <input type="text" class="stringParamName" id="'+param.name+'" placeholder="'+param.curr_value+'"><button class="update_params">Update</button></div>');
+  //     paramsDiv.append(newDiv);
+  //   }
+  //   $(".update_params").click(updateParameters);
+  // }
+  // 
+  // function makeNewStringParam(){
+  //   var name = $("#newStringParamName").val();
+  //   var original_value = $("#originalString").val();
+  //   console.log(name, original_value);
+  //   currently_edited_script.params.push({name:name,curr_value:""});
+  //   currently_edited_script.parameterized_trace.parameterizeTypedString(name, original_value);
+  //   displayScriptParameters(currently_edited_script); //show the new param which now needs to be set
+  // }
+  // 
+  // function updateParameters(){
+  //   var paramsDivs =  $(".stringParamName").html("");
+  //   console.log(paramsDivs);
+  //   var params = [];
+  //   for (var i = 0; i<paramsDivs.length; i++){
+  //     var paramDiv = $(paramsDivs[i]);
+  //     console.log(paramDiv);
+  //     var name = paramDiv.attr('id');
+  //     console.log(name);
+  //     var new_value = paramDiv.val();
+  //     params.push({name:name,curr_value:new_value});
+  //     currently_edited_script.parameterized_trace.useTypedString(name, new_value);
+  //   }
+  //   currently_edited_script.params = params;
+  // }
+   

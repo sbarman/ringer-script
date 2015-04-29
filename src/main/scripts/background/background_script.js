@@ -11,7 +11,7 @@ var currently_on = false;
 
       chrome.windows.create({
       url: chrome.extension.getURL('main/pages/mainpanel.html'), 
-          width: 500, height: 800, left: 0, top: 0, 
+          width: 800, height: 800, left: 0, top: 0, 
           focused: true,
           type: 'panel'
           }, 
@@ -30,6 +30,9 @@ var currently_on = false;
     console.log("currently on: "+currently_on);
     utilities.sendMessage("background", "content","currentlyOn", currently_on);
   });
+
+  openMainPanel();
+  currently_on = true;
 
   chrome.windows.onRemoved.addListener(function(winId) {
     if (typeof panelWindow == 'object' && panelWindow.id == winId) {
